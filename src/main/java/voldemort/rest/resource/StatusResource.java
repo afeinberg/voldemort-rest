@@ -1,7 +1,5 @@
 package voldemort.rest.resource;
 
-import com.sun.org.apache.bcel.internal.generic.ReturnaddressType;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;

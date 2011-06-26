@@ -10,16 +10,67 @@ import java.util.Properties;
 
 public class RESTConfig {
 
-    private final String boostrapUrls;
+    private final String bootstrapUrls;
+    private final String home;
     private final int port;
 
-    public RESTConfig(Properties properties) {
-        this(new Props(properties));
+    public static class Builder {
+        private String bootstrapUrls;
+        private String home;
+        private int port;
+
+        public String getBootstrapUrls() {
+            return bootstrapUrls;
+        }
+
+        public Builder setBootstrapUrls(String bootstrapUrls) {
+            this.bootstrapUrls = bootstrapUrls;
+            return this;
+        }
+
+        public String getHome() {
+            return home;
+        }
+
+        public Builder setHome(String home) {
+            this.home = home;
+            return this;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public Builder setPort(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public RESTConfig build() {
+            return new RESTConfig(this);
+        }
     }
 
-    public RESTConfig(Props props) {
-        this.port = props.getInt("rest.server.port");
-        this.boostrapUrls = props.getString("bootstrap.urls");
+    public RESTConfig(Builder builder) {
+        this.bootstrapUrls = builder.getBootstrapUrls();
+        this.home = builder.getHome();
+        this.port = builder.getPort();
+
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilderFromProps(Props props) {
+        Builder builder = new Builder();
+        builder.setBootstrapUrls(props.getString("bootstrap.urls"));
+        builder.setPort(props.getInt("rest.server.port"));
+        return builder;
+    }
+
+    public static Builder newBuilderFromProperties(Properties properties) {
+        return newBuilderFromProps(new Props(properties));
     }
 
     public static RESTConfig loadFromHome(String voldemortRestHome) {
@@ -37,15 +88,21 @@ public class RESTConfig {
             throw new ConfigurationException(e);
         }
 
-        return new RESTConfig(properties);
+        return RESTConfig.newBuilderFromProps(properties)
+                         .setHome(voldemortRestHome)
+                         .build();
     }
 
-    public String getBoostrapUrls() {
-        return boostrapUrls;
+    public String getBootstrapUrls() {
+        return bootstrapUrls;
     }
 
     public int getPort() {
         return port;
+    }
+
+    public String getHome() {
+        return home;
     }
 }
 

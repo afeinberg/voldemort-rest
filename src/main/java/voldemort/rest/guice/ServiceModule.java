@@ -4,6 +4,7 @@ import com.google.inject.servlet.ServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.eclipse.jetty.server.Server;
 import voldemort.client.StoreClientFactory;
 import voldemort.rest.config.RESTConfig;
 import voldemort.rest.resource.StatusResource;
@@ -23,9 +24,10 @@ public class ServiceModule extends ServletModule {
 
     protected void configureServlets() {
         bind(RESTConfig.class).toInstance(config);
-        bind(RESTServer.class).toProvider(RESTServerProvider.class).asEagerSingleton();
-        bind(StoreClientFactory.class).toProvider(VoldemortClientProvider.class)
-                .asEagerSingleton();
+        bind(Server.class).toProvider(JettyProvider.class).asEagerSingleton();
+        bind(RESTServer.class).asEagerSingleton();
+
+        bind(StoreClientFactory.class).toProvider(VoldemortClientProvider.class).asEagerSingleton();
         bind(StoreResource.class).asEagerSingleton();
         bind(StatusResource.class).asEagerSingleton();
 

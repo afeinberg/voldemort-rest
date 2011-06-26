@@ -3,11 +3,8 @@ package voldemort.rest.server;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.servlet.GuiceFilter;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import voldemort.VoldemortException;
 import voldemort.rest.config.RESTConfig;
 import voldemort.rest.guice.ServiceModule;
@@ -19,13 +16,12 @@ public class RESTServer extends AbstractService {
 
     private static final Logger logger = Logger.getLogger(RESTServer.class);
 
-    private final RESTConfig config;
     private final Server jettyServer;
 
-    public RESTServer(RESTConfig config) {
+    @Inject
+    public RESTServer(Server jettyServer) {
         super(ServiceType.HTTP);
-        this.config = config;
-        jettyServer = new Server(config.getPort());
+        this.jettyServer = jettyServer;
     }
 
     @Override
@@ -53,13 +49,6 @@ public class RESTServer extends AbstractService {
     }
 
     public void startServer() {
-        ServletContextHandler root = new ServletContextHandler(jettyServer,
-                                                               "/",
-                                                               ServletContextHandler.NO_SESSIONS);
-
-        root.addFilter(GuiceFilter.class, "/*", 0);
-        root.addServlet(DefaultServlet.class, "/*");
-
         try {
             jettyServer.start();
         } catch(Exception e) {
