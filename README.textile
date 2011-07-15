@@ -2,68 +2,42 @@ h1. Voldemort REST API
 
 The point of the REST api is multi-fold:
 
-# Ease of development, espeically for non-production projects (e.g., a
-  viewer tool for prototype data sets). 
-## Ease of building clients in new languages. This is especially true
-  for scripting languages where performance is not a significant
-  concern in the first place.
-# Operational tooling: operations can use this in place of the client
-  shell, especially for automated validation. They can simply use
-  @curl@ to query the stores.
+# Ease of development, espeically for non-production projects (e.g., a viewer tool for prototype data sets).
+## Ease of building clients in new languages. This is especially true for scripting languages where performance is not a significant concern in the first place.
+# Operational tooling: operations can use this in place of the client shell, especially for automated validation. They can simply use @curl@ to query the stores.
 
-I am basing the API from Riak, but with some modifications due to
-differences between Voldemort and Riak and "if we were to do this
-again, we would..." discussions with Riak developers.
+I am basing the API from Riak, but with some modifications due to differences between Voldemort and Riak and "if we were to do this again, we would..." discussions with Riak developers.
 
 
 h2. Passing vector clocks
 
-To pass a vector clock (from client to server and server to client),
-we will use an @X-Voldemort-VClock@ header, containing the
-representation of the vector clock as a JSON string.
+To pass a vector clock (from client to server and server to client), we will use an @X-Voldemort-VClock@ header, containing the representation of the vector clock as a JSON string.
 
 The other alternative is to use an ETag.
 
 h2. GETs, multiple versions and reconciliation
 
-With partial causal ordering, it is possible that there are multiple
-versions of a value will exist that can not be automatically
-reconciled. Riak uses mime multi-part for this, however this is mainly
-done for a historical reason.
+With partial causal ordering, it is possible that there are multiple versions of a value will exist that can not be automatically reconciled. Riak uses mime multi-part for this, however this is mainly done for a historical reason.
 
-A more restful approach for this is to use the @HTTP-300@ response: 
-[http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1]
+A more restful approach for this is to use the @HTTP-300@ response: "http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1":http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1
 
-In this case, we will use a separate URL to represent each
-version (with a checksum of the vector clock as part of the url 
-e.g., @/v1/storename/key/deadbeef@). 
+In this case, we will use a separate URL to represent each version (with a checksum of the vector clock as part of the url e.g., @/v1/storename/key/deadbeef@).
 
 h2. PUTs
 
 * To do a clobbering put use a @POST@
-
+ 
 * To do a conditional put, use a @PUT@ with @X-Voldemort-VClock@
   header set
 
 h2. Multi-get
 
-Use @multi-part/related@ with @Content-ID@ header for each part.
-@X-Voldemort-VClock@ header becomes a (JSON-encoded) map, with
-a content-id for each value part pointing to a corresponding vector
-clock. 
+Use @multi-part/related@ with @Content-ID@ header for each part. @X-Voldemort-VClock@ header becomes a (JSON-encoded) map, with a content-id for each value part pointing to a corresponding vector clock.
 
 h2. Serialization
 
-We could do this opaequely, but this makes it difficult for clients
-written in scripting languages (or ops people using curl) to interact
-with stores using Protocol Buffers or Voldemort's binary JSON. 
+We could do this opaquely, but this makes it difficult for clients written in scripting languages (or ops people using curl) to interact with stores using Protocol Buffers or Voldemort's binary JSON.
 
-Instead, a more reasonable approach might be to use something akin to
-Jackson's POJO mapper to map already deserialized (via the Java based
-serializer) objects to JSON. To avoid additional reflection, we could
-also write direct translators for the most common (Avro, binary JSON)
-serializers. 
+Instead, a more reasonable approach might be to use something akin to Jackson's POJO mapper to map already deserialized (via the Java based serializer) objects to JSON. To avoid additional reflection, we could also write direct translators for the most common (Avro, binary JSON) serializers.
 
-Clients can also pass their own @Accept@ headers to specify which
-content-type they'd like to use i.e., whether they want to receive
-opaque binary data or JSON.
+Clients can also pass their own @Accept@ headers to specify which content-type they'd like to use i.e., whether they want to receive opaque binary data or JSON.
