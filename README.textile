@@ -3,7 +3,7 @@ h1. Voldemort REST API
 The point of the REST api is multi-fold:
 
 # Ease of development, espeically for non-production projects (e.g., a viewer tool for prototype data sets).
-## Ease of building clients in new languages. This is especially true for scripting languages where performance is not a significant concern in the first place.
+# Ease of building clients in new languages. This is especially true for scripting languages where performance is not a significant concern in the first place.
 # Operational tooling: operations can use this in place of the client shell, especially for automated validation. They can simply use @curl@ to query the stores.
 
 I am basing the API from Riak, but with some modifications due to differences between Voldemort and Riak and "if we were to do this again, we would..." discussions with Riak developers.
